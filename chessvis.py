@@ -1,0 +1,191 @@
+from fenparser import FenParser
+import numpy as np
+
+
+class Piece():
+
+    piece_values = {
+        ' ': None,
+        'p': 1,
+        'n': 3,
+        'b': 3,
+        'r': 5,
+        'q': 9,
+        'k': 0
+    }
+
+    piece_vision = {
+        ' ': [[], 0],
+        'p': [[(1, 1), (1, -1)], 1],
+        'n': [[(2, 1), (2, -1), (-2, 1), (-2, -1), (1, 2), (-1, 2), (-1, -2), (1, -2)], 1],
+        'b': [[(1, 1), (1, -1), (-1, 1), (-1, -1)], 8],
+        'r': [[(1, 0), (-1, 0), (0, 1), (0, -1)], 8],
+        'q': [[(1, 0), (-1, 0), (0, 1), (0, -1), (1, 1), (1, -1), (-1, 1), (-1, -1)], 8],
+        'k': [[(1, 0), (-1, 0), (0, 1), (0, -1), (1, 1), (1, -1), (-1, 1), (-1, -1)], 1]
+    }
+
+    piece_names = {
+        ' ': 'Empty',
+        'p': 'Pawn',
+        'n': 'Knight',
+        'b': 'Bishop',
+        'r': 'Rook',
+        'q': 'Queen',
+        'k': 'King',
+    }
+
+    def __init__(self, piece: str) -> None:
+        self.type = piece
+        self.value = self.piece_values[piece.lower()]
+        if piece.isupper():
+            self.color = 'w'
+        elif piece.islower():
+            self.color = 'b'
+        else:
+            self.color = 'Empty'
+
+    def get_vision(self) -> list:
+        return self.piece_vision[self.type.lower()]
+
+    def __str__(self) -> str:
+        return self.type if self.type != ' ' else '.'
+
+    def __repr__(self) -> str:
+        return str(self)
+
+
+class Square():
+
+    piece = None
+    rank = 0
+    file = 0
+    X = 0
+    O = 0
+    king = False
+
+    def __init__(self, piece: Piece, position: (int, int), X: int, O: int, king: bool):
+
+        self.piece = piece
+        self.rank = position[0]
+        self.file = position[1]
+        self.X = X
+        self.O = O
+        self.king = king
+
+    def __eq__(self, other):
+        return self.piece == other.piece and\
+            self.rank == other.rank and\
+            self.file == other.file and\
+            self.X == other.X and\
+            self.O == other.O and\
+            self.king == other.king
+
+    def __str__(self) -> str:
+        if self.piece is None:
+            return '.'
+        else:
+            return str(self.piece)
+
+    def __repr__(self) -> str:
+        return str(self)
+
+    def update_vision(self, vision):
+        self.X = vision[0]
+        self.O = vision[1]
+
+
+class Board():
+
+    isChecked = False
+    vision_matrix = {'w': np.zeros((8, 8)), 'b': np.zeros((8, 8))}
+    board = [[Square(Piece(' '), (i, j), 0, 0, False)
+              for i in range(8)] for j in range(8)]
+
+    def __init__(self, fen='8/8/8/8/8/8/8/8'):
+        self.fen = fen
+        self.parse_fen(fen)
+
+    def get_board(self):
+        return self.board
+
+    def get_vision_matrix(self):
+        return self.vision_matrix
+
+    def parse_fen(self, fen):
+        fen_parser = FenParser(fen)
+        self.board = self.update_board(fen_parser.parse())
+
+    def update_board(self, fen_board):
+        board = []
+        for rank in range(8):
+            board.append([])
+            for file in range(8):
+                piece_type = fen_board[rank][file]
+                piece = Piece(piece_type)
+                board[rank].append(Square(
+                    piece, (rank, file), 0, 0, False if piece.type.lower() != 'k' else True))
+
+        # calculate vision matrix
+        self.calculate_vision_matrix(board)
+
+        return board
+
+    def calculate_vision_matrix(self, board):
+        # iterate through squares
+        # each square has a piece
+        # each piece has a vision
+        # each vision has a direction
+        # each direction has a distance
+        # a pawn on c2 can only see b3 and d3
+        # its vision matrix would be all 0s except for b3 and d3 which will be 1s
+        # the summation of the vision matrices of the white pieces will be the white vision matrix, and vice versa
+        # a squares O value is the white vision matrix - the black vision matrix, and vice versa
+
+        for rank in range(8):
+            for file in range(8):
+                piece = board[rank][file].piece
+                if piece.type != ' ':
+                    vectors = piece.get_vision()
+                    directions = vectors[0]
+                    dist = vectors[1]
+                    for direction in directions:
+                        for distance in range(1, dist):
+                            new_rank = rank + direction[0] * distance
+                            new_file = file + direction[1] * distance
+                            if new_rank in range(8) and new_file in range(8):
+                                if board[new_rank][new_file].piece.type == ' ':
+                                    self.vision_matrix[piece.color][new_rank][new_file] += 1
+                                else:
+                                    self.vision_matrix[piece.color][new_rank][new_file] += 1
+                                    break    # piece in the way
+                            else:
+                                break    # out of bounds
+        # calculate O values
+        self.vision_matrix['w'] = self.vision_matrix['w'] - \
+            self.vision_matrix['b']
+        self.vision_matrix['b'] = self.vision_matrix['b'] - \
+            self.vision_matrix['w']
+
+        # update X, O values
+        for rank in range(8):
+            for file in range(8):
+                board[rank][file].update_vision(
+                    (self.vision_matrix['w'][rank][file], self.vision_matrix['b'][rank][file]))
+
+        print("Updated matrix: ", self.vision_matrix)
+
+    # define print function: print(board)
+
+    def __str__(self):
+        board_str = ''
+        for rank in range(8):
+            for file in range(8):
+                board_str += str(self.board[rank][file]) + ' ' + str(
+                    self.board[rank][file].X) + ' ' + str(self.board[rank][file].O) + '   '
+            board_str += '\n'
+        return board_str
+
+    def __repr__(self) -> str:
+        for rank in self.board:
+            print(rank)
+            print('\n')
