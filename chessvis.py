@@ -5,7 +5,7 @@ import numpy as np
 class Piece():
 
     piece_values = {
-        ' ': None,
+        ' ': 0,
         'p': 1,
         'n': 3,
         'b': 3,
@@ -18,9 +18,9 @@ class Piece():
         ' ': [[], 0],
         'p': [[(1, 1), (1, -1)], 1],
         'n': [[(2, 1), (2, -1), (-2, 1), (-2, -1), (1, 2), (-1, 2), (-1, -2), (1, -2)], 1],
-        'b': [[(1, 1), (1, -1), (-1, 1), (-1, -1)], 8],
-        'r': [[(1, 0), (-1, 0), (0, 1), (0, -1)], 8],
-        'q': [[(1, 0), (-1, 0), (0, 1), (0, -1), (1, 1), (1, -1), (-1, 1), (-1, -1)], 8],
+        'b': [[(1, 1), (1, -1), (-1, 1), (-1, -1)], 7],
+        'r': [[(1, 0), (-1, 0), (0, 1), (0, -1)], 7],
+        'q': [[(1, 0), (-1, 0), (0, 1), (0, -1), (1, 1), (1, -1), (-1, 1), (-1, -1)], 7],
         'k': [[(1, 0), (-1, 0), (0, 1), (0, -1), (1, 1), (1, -1), (-1, 1), (-1, -1)], 1]
     }
 
@@ -96,13 +96,12 @@ class Square():
 
 class Board():
 
-    isChecked = False
-    vision_matrix = {'w': np.zeros((8, 8)), 'b': np.zeros((8, 8))}
-    board = [[Square(Piece(' '), (i, j), 0, 0, False)
-              for i in range(8)] for j in range(8)]
-
     def __init__(self, fen='8/8/8/8/8/8/8/8'):
-        self.fen = fen
+        self.isChecked = False
+        self.vision_matrix = {'w': [[0 for x in range(8)] for _ in  range(8)], 'b': [[0 for x in range(8)] for _ in  range(8)]}
+        #self.vision_matrix = {'w': [[[] for x in range(8)] for _ in  range(8)], 'b': [[[] for x in range(8)] for _ in  range(8)]}
+        self.board = [[Square(Piece(' '), (i, j), 0, 0, False)
+                      for i in range(8)] for j in range(8)]
         self.parse_fen(fen)
 
     def get_board(self):
@@ -149,30 +148,25 @@ class Board():
                     directions = vectors[0]
                     dist = vectors[1]
                     for direction in directions:
-                        for distance in range(1, dist):
+                        for distance in range(1, dist + 1):
+                            if piece.color == 'w':
+                                distance = -distance
                             new_rank = rank + direction[0] * distance
                             new_file = file + direction[1] * distance
                             if new_rank in range(8) and new_file in range(8):
                                 if board[new_rank][new_file].piece.type == ' ':
-                                    self.vision_matrix[piece.color][new_rank][new_file] += 1
-                                else:
-                                    self.vision_matrix[piece.color][new_rank][new_file] += 1
-                                    break    # piece in the way
-                            else:
-                                break    # out of bounds
-        # calculate O values
-        self.vision_matrix['w'] = self.vision_matrix['w'] - \
-            self.vision_matrix['b']
-        self.vision_matrix['b'] = self.vision_matrix['b'] - \
-            self.vision_matrix['w']
-
-        # update X, O values
-        for rank in range(8):
-            for file in range(8):
-                board[rank][file].update_vision(
-                    (self.vision_matrix['w'][rank][file], self.vision_matrix['b'][rank][file]))
-
-        print("Updated matrix: ", self.vision_matrix)
+                                    self.vision_matrix[piece.color][new_rank][new_file]+=1
+                                    #self.vision_matrix[piece.color][new_rank][new_file].append(piece.value)
+                                elif board[new_rank][new_file].piece.type != ' ':
+                                    self.vision_matrix[piece.color][new_rank][new_file]+=1
+                                    #self.vision_matrix[piece.color][new_rank][new_file].append(piece.value)
+                                    break  # piece in the way
+        
+        self.vision_matrix['w'] = self.vision_matrix['w']-self.vision_matrix['b']
+        self.vision_matrix['b'] = self.vision_matrix['b']-self.vision_matrix['w']
+        #wvision = self.vision_matrix['w']
+        #bvision = self.vision_matrix['b']
+                
 
     # define print function: print(board)
 
@@ -188,4 +182,3 @@ class Board():
     def __repr__(self) -> str:
         for rank in self.board:
             print(rank)
-            print('\n')
