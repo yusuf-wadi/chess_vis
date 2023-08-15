@@ -155,10 +155,10 @@ class Board():
                             new_file = file + direction[1] * distance
                             if new_rank in range(8) and new_file in range(8):
                                 if board[new_rank][new_file].piece.type == ' ':
-                                    self.vision_matrix[piece.color][new_rank][new_file]+=1
+                                    self.vision_matrix[piece.color][new_rank][new_file]+=1*piece.value
                                     #self.vision_matrix[piece.color][new_rank][new_file].append(piece.value)
                                 elif board[new_rank][new_file].piece.type != ' ':
-                                    self.vision_matrix[piece.color][new_rank][new_file]+=1
+                                    self.vision_matrix[piece.color][new_rank][new_file]+=1*piece.value
                                     #self.vision_matrix[piece.color][new_rank][new_file].append(piece.value)
                                     break  # piece in the way
         
