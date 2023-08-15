@@ -162,8 +162,8 @@ class Board():
                                     #self.vision_matrix[piece.color][new_rank][new_file].append(piece.value)
                                     break  # piece in the way
         
-        self.vision_matrix['w'] = self.vision_matrix['w']-self.vision_matrix['b']
-        self.vision_matrix['b'] = self.vision_matrix['b']-self.vision_matrix['w']
+        # calculate O values
+        self.vision_matrix['w'] = np.array(self.vision_matrix['w']) - np.array(self.vision_matrix['b'])
         #wvision = self.vision_matrix['w']
         #bvision = self.vision_matrix['b']
                 
