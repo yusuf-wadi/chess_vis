@@ -45,7 +45,7 @@ def draw_pieces(screen, board, size):
             piece = board.board[row][col].piece
             if piece.type != ' ':
                 piece_image = pygame.image.load(
-                    f'assets/{piece.color}{piece.piece_names[piece.type.lower()]}.png')
+                    f'pieces/{piece.color}{piece.piece_names[piece.type.lower()]}.png')
                 piece_image = pygame.transform.scale(piece_image, (size, size))
                 screen.blit(piece_image, pygame.Rect(
                     col * size, row * size, size, size))
@@ -57,7 +57,7 @@ def gui(boards):
     # height = 400
     # square_size = width // 8
     # Load the knight image
-    knight_image = pygame.image.load("assets/bknight.png")
+    knight_image = pygame.image.load("pieces/bknight.png")
     # Set the window icon to the knight image
     pygame.display.set_icon(knight_image)
     screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.RESIZABLE)
