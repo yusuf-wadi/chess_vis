@@ -98,10 +98,11 @@ class Board():
 
     def __init__(self, fen='8/8/8/8/8/8/8/8'):
         self.isChecked = False
-        self.vision_matrix = {'w': [[0 for x in range(8)] for _ in  range(8)], 'b': [[0 for x in range(8)] for _ in  range(8)]}
-        #self.vision_matrix = {'w': [[[] for x in range(8)] for _ in  range(8)], 'b': [[[] for x in range(8)] for _ in  range(8)]}
+        #self.vision_matrix = {'w': [[0 for x in range(8)] for _ in  range(8)], 'b': [[0 for x in range(8)] for _ in  range(8)]}
+        self.vision_matrix = {'w': [[[] for x in range(8)] for _ in  range(8)], 'b': [[[] for x in range(8)] for _ in  range(8)]}
         self.board = [[Square(Piece(' '), (i, j), 0, 0, False)
                       for i in range(8)] for j in range(8)]
+        self.first_color = ''
         self.parse_fen(fen)
 
     def get_board(self):
@@ -121,6 +122,9 @@ class Board():
             for file in range(8):
                 piece_type = fen_board[rank][file]
                 piece = Piece(piece_type)
+                # check for top of board color
+                if self.first_color == '':
+                    self.first_color = piece.color
                 board[rank].append(Square(
                     piece, (rank, file), 0, 0, False if piece.type.lower() != 'k' else True))
 
@@ -149,23 +153,31 @@ class Board():
                     dist = vectors[1]
                     for direction in directions:
                         for distance in range(1, dist + 1):
-                            if piece.color == 'w':
+                            if piece.color != self.first_color:
                                 distance = -distance
                             new_rank = rank + direction[0] * distance
                             new_file = file + direction[1] * distance
                             if new_rank in range(8) and new_file in range(8):
-                                if board[new_rank][new_file].piece.type == ' ':
-                                    self.vision_matrix[piece.color][new_rank][new_file]+=1*piece.value
-                                    #self.vision_matrix[piece.color][new_rank][new_file].append(piece.value)
-                                elif board[new_rank][new_file].piece.type != ' ':
-                                    self.vision_matrix[piece.color][new_rank][new_file]+=1*piece.value
-                                    #self.vision_matrix[piece.color][new_rank][new_file].append(piece.value)
+                                target_square = board[new_rank][new_file]
+                                if target_square.piece.type == ' ':
+                                    #self.vision_matrix[piece.color][new_rank][new_file]+=1*piece.value
+                                    self.vision_matrix[piece.color][new_rank][new_file].append(piece.value)
+                                elif target_square.piece.type != ' ':
+                                    if target_square.piece.type == 'k' and target_square.piece.color != piece.color:
+                                        self.isChecked = True 
+                                        self.vision_matrix[piece.color][new_rank][new_file].append(piece.value*10)
+                                        break
+                                    elif target_square.piece.type == 'k' and target_square.piece.color == piece.color:
+                                        self.vision_matrix[piece.color][new_rank][new_file].append(piece.value)
+                                        break
+                                    #self.vision_matrix[piece.color][new_rank][new_file]+=1*piece.value
+                                    self.vision_matrix[piece.color][new_rank][new_file].append(piece.value)
                                     break  # piece in the way
         
         # calculate O values
-        self.vision_matrix['w'] = np.array(self.vision_matrix['w']) - np.array(self.vision_matrix['b'])
-        #wvision = self.vision_matrix['w']
-        #bvision = self.vision_matrix['b']
+        #self.vision_matrix['w'] = np.array(self.vision_matrix['w']) - np.array(self.vision_matrix['b'])
+        wvision = self.vision_matrix['w']
+        bvision = self.vision_matrix['b']
                 
 
     # define print function: print(board)
