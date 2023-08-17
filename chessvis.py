@@ -1,9 +1,11 @@
 from fenparser import FenParser
 import numpy as np
+import chess.pgn
 
 
 class Piece():
 
+    # jacob sarratt?
     piece_values = {
         ' ': 0,
         'p': 1,
@@ -11,7 +13,7 @@ class Piece():
         'b': 3,
         'r': 5,
         'q': 9,
-        'k': 0
+        'k': 10000
     }
 
     piece_vision = {
@@ -98,8 +100,10 @@ class Board():
 
     def __init__(self, fen='8/8/8/8/8/8/8/8'):
         self.isChecked = False
+        self.fen = fen
         #self.vision_matrix = {'w': [[0 for x in range(8)] for _ in  range(8)], 'b': [[0 for x in range(8)] for _ in  range(8)]}
-        self.vision_matrix = {'w': [[[] for x in range(8)] for _ in  range(8)], 'b': [[[] for x in range(8)] for _ in  range(8)]}
+        self.vision_matrix = {'w': [[[] for x in range(8)] for _ in range(8)], 'b': [
+            [[] for x in range(8)] for _ in range(8)]}
         self.board = [[Square(Piece(' '), (i, j), 0, 0, False)
                       for i in range(8)] for j in range(8)]
         self.first_color = ''
@@ -113,7 +117,14 @@ class Board():
 
     def parse_fen(self, fen):
         fen_parser = FenParser(fen)
-        self.board = self.update_board(fen_parser.parse())
+        fen_board = fen_parser.parse()
+        self.board = self.update_board(fen_board)
+    
+    def move_piece_fen(self, square, position):
+        # get new fen based on move
+        # update board
+        self.board[square.rank][square.file] = Square(Piece(' '), (square.rank, square.file), 0, 0, False)
+        self.board[position[0]][position[1]] = Square(square.piece, position, 0, 0, False)
 
     def update_board(self, fen_board):
         board = []
@@ -160,25 +171,27 @@ class Board():
                             if new_rank in range(8) and new_file in range(8):
                                 target_square = board[new_rank][new_file]
                                 if target_square.piece.type == ' ':
-                                    #self.vision_matrix[piece.color][new_rank][new_file]+=1*piece.value
-                                    self.vision_matrix[piece.color][new_rank][new_file].append(piece.value)
+                                    # self.vision_matrix[piece.color][new_rank][new_file]+=1*piece.value
+                                    self.vision_matrix[piece.color][new_rank][new_file].append(
+                                        piece.value)
                                 elif target_square.piece.type != ' ':
-                                    if target_square.piece.type == 'k' and target_square.piece.color != piece.color:
-                                        self.isChecked = True 
-                                        self.vision_matrix[piece.color][new_rank][new_file].append(piece.value*10)
+                                    if target_square.piece.type.lower() == 'k' and target_square.piece.color != piece.color:
+                                        self.isChecked = True
+                                        self.vision_matrix[piece.color][new_rank][new_file].append(
+                                            piece.value*10)
                                         break
-                                    elif target_square.piece.type == 'k' and target_square.piece.color == piece.color:
-                                        self.vision_matrix[piece.color][new_rank][new_file].append(piece.value)
+                                    elif target_square.piece.type.lower() == 'k' and target_square.piece.color == piece.color:
+                                        # self.vision_matrix[piece.color][new_rank][new_file].append(piece.value)
                                         break
-                                    #self.vision_matrix[piece.color][new_rank][new_file]+=1*piece.value
-                                    self.vision_matrix[piece.color][new_rank][new_file].append(piece.value)
+                                    # self.vision_matrix[piece.color][new_rank][new_file]+=1*piece.value
+                                    self.vision_matrix[piece.color][new_rank][new_file].append(
+                                        piece.value)
                                     break  # piece in the way
-        
+
         # calculate O values
         #self.vision_matrix['w'] = np.array(self.vision_matrix['w']) - np.array(self.vision_matrix['b'])
         wvision = self.vision_matrix['w']
         bvision = self.vision_matrix['b']
-                
 
     # define print function: print(board)
 
@@ -194,3 +207,17 @@ class Board():
     def __repr__(self) -> str:
         for rank in self.board:
             print(rank)
+
+
+class util():
+
+    def boards_from_pgn(pgn):
+        game = chess.pgn.read_game(pgn)
+        game_fens = []
+        while game.next():
+            game = game.next()
+            game_fens.append(game.board().fen())
+        return [Board(fen=fen) for fen in game_fens]
+
+    def boards_from_fens(fens):
+        return [Board(fen=fen) for fen in fens]
