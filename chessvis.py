@@ -145,15 +145,6 @@ class Board():
         return board
 
     def calculate_vision_matrix(self, board):
-        # iterate through squares
-        # each square has a piece
-        # each piece has a vision
-        # each vision has a direction
-        # each direction has a distance
-        # a pawn on c2 can only see b3 and d3
-        # its vision matrix would be all 0s except for b3 and d3 which will be 1s
-        # the summation of the vision matrices of the white pieces will be the white vision matrix, and vice versa
-        # a squares O value is the white vision matrix - the black vision matrix, and vice versa
 
         for rank in range(8):
             for file in range(8):
@@ -220,4 +211,7 @@ class util():
         return [Board(fen=fen) for fen in game_fens]
 
     def boards_from_fens(fens):
-        return [Board(fen=fen) for fen in fens]
+        with open(fens, 'r') as f:
+            fens = f.readlines()
+            
+            return [Board(fen=fen) for fen in fens]
