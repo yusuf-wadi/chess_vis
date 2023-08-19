@@ -4,6 +4,10 @@ See the board in a new way, helpful for understanding positions
 
 ![Alt text](assets/image.png)
 
+# How to Use
+
+Currently, run test.py
+
 # Journal
 
 Okay, lot goin on here.  
