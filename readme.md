@@ -2,7 +2,7 @@
 
 See the board in a new way, helpful for understanding positions
 
-[[https://www.youtube.com/watch?v=2CT6dtyA8GE]]
+https://www.youtube.com/watch?v=2CT6dtyA8GE
 
 # How to Use
 
