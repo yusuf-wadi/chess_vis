@@ -18,9 +18,6 @@ fen_paths = items_from_folder('fens')
 # pgn folder of current directory
 pgn_paths = items_from_folder('pgns')
 
-print(fen_paths, pgn_paths)
-
-
 class ChessGUI():
 
     def __init__(self):
@@ -103,7 +100,13 @@ class ChessGUI():
 
     def setup_boards(self):
         if self.choice == 1:
-            pgn = open(pgn_paths[0])
+            choose_pgn = pygame_menu.Menu(title='PGN', width=600, height=600, theme=pygame_menu.themes.THEME_DARK)
+            choose_pgn.add.dropselect('Select: ', pgn_paths, dropselect_id = 'pgn')
+            choose_pgn.add.button('Play', choose_pgn.disable)
+            choose_pgn.mainloop(self.screen)
+            path = choose_pgn.get_widget('pgn').get_value()
+            print(path[0])
+            pgn = open(path[0])
             return util.boards_from_pgn(pgn)
         elif self.choice == 2:
             return util.boards_from_fens(fen_paths[0])
@@ -113,7 +116,6 @@ class ChessGUI():
             text.add.button('Play', text.disable)
             text.mainloop(self.screen)
             fen = str(text.get_input_data().values())
-            print(fen)
             return [Board(fen)]
             
 
