@@ -2,7 +2,7 @@
 
 See the board in a new way, helpful for understanding positions
 
-![Alt text](assets/image.png)
+https://www.youtube.com/watch?v=2CT6dtyA8GE
 
 # How to Use
 
