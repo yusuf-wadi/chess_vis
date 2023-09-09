@@ -98,8 +98,7 @@ def gui(boards, state):
         if keys[pygame.K_SPACE]:
             pieces = not pieces
             pygame.time.delay(delay)
-        if pieces:
-            draw_pieces(screen, board, SQUARE_SIZE)
+        
         
         if state == 'c':
             #check if user clicked on a piece, if so, highlight it, then check if user clicked on a valid move, if so, move the piece
@@ -122,6 +121,8 @@ def gui(boards, state):
                         pygame.time.delay(delay)
                         
         draw_board(screen, board, scaler)
+        if pieces:
+            draw_pieces(screen, board, SQUARE_SIZE)
                 
         pygame.display.flip()
 

@@ -31,6 +31,8 @@ class FenParser():
 
   def expand(self, num_str):
     return int(num_str)*" "
+  
+
 
 
 

@@ -1,6 +1,6 @@
 import chess_gui as cg
 from chessvis import util, Board
-
+import fenparser
 
 # main function
 if __name__ == '__main__':
@@ -24,5 +24,9 @@ if __name__ == '__main__':
     elif choice == 'p':
         cg.gui(game_pgn, choice)
     elif choice == 'c':
-        cg.gui([Board('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR')], choice)
+        user_fen = input("Enter a fen or type 'start': ")
+        if user_fen == 'start':
+            user_fen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR'
+
+        cg.gui([Board(user_fen)], choice)
     
