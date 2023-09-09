@@ -14,6 +14,11 @@ def draw_board(screen, board: Board, scaler=0):
 
             square_power_w = square_vision['w'][row][col]
             square_power_b = square_vision['b'][row][col]
+            
+            if 0 in square_power_w:
+                square_power_w.remove(0)
+            if 0 in square_power_b:
+                square_power_b.remove(0)
 
             len_diff = len(square_power_w) - len(square_power_b)
             value_diff = sum(square_power_w) - sum(square_power_b)
@@ -25,9 +30,9 @@ def draw_board(screen, board: Board, scaler=0):
             else:
                 # keep values between 0 and 255
                 
-                r = max(0,(min(100 + math.floor(-value_diff *flip* scale) - math.floor(len_diff * scale*10), 255)))
+                r = max(0,(min(100 + math.floor(-value_diff *flip* scale) - math.floor(len_diff * scale*100), 255)))
                 g = 0 
-                b = max(0,(min(100 + math.floor(value_diff * flip * scale) + math.floor(len_diff * scale*10), 255)))
+                b = max(0,(min(100 + math.floor(value_diff * flip * scale) + math.floor(len_diff * scale*100), 255)))
             
 
             
