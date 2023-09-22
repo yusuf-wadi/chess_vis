@@ -1,4 +1,4 @@
-# Chess Visualizer
+# Chess Visualizer: use cli branch tbh
 
 See the board in a new way, helpful for understanding positions
 
