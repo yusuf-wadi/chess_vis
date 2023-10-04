@@ -12,35 +12,37 @@ if __name__ == '__main__':
     while True:
         
         choice = input("F:Fen, P:PGN, C:Custom -> (f/p/c): ")
+
+        match(choice):
         
-        if choice == 'f':
-            fens_path = os.listdir(fen_path)
-            for i, fen in enumerate(fens_path):
-                print('-'*(len(fen)+7))
-                print('|',i,'|', fen, '|')
-                print('-'*(len(fen)+7))
-            fen_choice = int(input("Choose a fen: "))
-            fen = fens_path[fen_choice]
-            fens = os.path.join(fen_path, fen)
-            boards = util.boards_from_fens(fens)
-            cg.gui(boards, 'f')
-            
-        if choice == 'p':
-            pgns_path = os.listdir(pgn_path)
-            for i, pgn in enumerate(pgns_path):
-                print('-'*(len(pgn)+7))
-                print( '|',i,'|', pgn, '|')
-                print('-'*(len(pgn)+7))
-            pgn_choice = int(input("Choose a pgn: "))
-            pgn = pgns_path[pgn_choice]
-            pgn = os.path.join(pgn_path, pgn)
-            pgn = open(pgn)
-            boards = util.boards_from_pgn(pgn)
-            cg.gui(boards, 'p')
-            
-        if choice == 'c':
-            fen = input("Enter a fen: ")
-            boards = [Board(fen)]
-            cg.gui(boards, 'c')
-            
+            case 'f':
+                fens_path = os.listdir(fen_path)
+                for i, fen in enumerate(fens_path):
+                    print('-'*(len(fen)+7))
+                    print('|',i,'|', fen, '|')
+                    print('-'*(len(fen)+7))
+                fen_choice = int(input("Choose a fen: "))
+                fen = fens_path[fen_choice]
+                fens = os.path.join(fen_path, fen)
+                boards = util.boards_from_fens(fens)
+                cg.gui(boards, 'f')
+                
+            case 'p':
+                pgns_path = os.listdir(pgn_path)
+                for i, pgn in enumerate(pgns_path):
+                    print('-'*(len(pgn)+7))
+                    print( '|',i,'|', pgn, '|')
+                    print('-'*(len(pgn)+7))
+                pgn_choice = int(input("Choose a pgn: "))
+                pgn = pgns_path[pgn_choice]
+                pgn = os.path.join(pgn_path, pgn)
+                pgn = open(pgn)
+                boards = util.boards_from_pgn(pgn)
+                cg.gui(boards, 'p')
+                
+            case 'c':
+                fen = input("Enter a fen: ")
+                boards = [Board(fen)]
+                cg.gui(boards, 'c')
+                
     
